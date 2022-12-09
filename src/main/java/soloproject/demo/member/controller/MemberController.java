@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import soloproject.demo.member.dto.MemberDto;
+import soloproject.demo.member.service.MemberService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -15,6 +16,12 @@ import java.util.Map;
 @RequestMapping("v1/members")
 @Validated
 public class MemberController {
+  private final MemberService memberService;
+
+  public MemberController(MemberService memberService) {
+    this.memberService = memberService;
+  }
+
   @PostMapping
   public ResponseEntity postMember(@Valid @RequestBody MemberDto.Post requestBody) {
 
