@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import soloproject.demo.coffee.dto.CoffeeDto;
+import soloproject.demo.coffee.entity.Coffee;
+import soloproject.demo.coffee.service.CoffeeService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -15,10 +17,24 @@ import java.util.Map;
 @RequestMapping("/v1/coffees")
 @Validated
 public class CoffeeController {
+  private final CoffeeService coffeeService;
+
+  public CoffeeController(CoffeeService coffeeService) {
+    this.coffeeService = coffeeService;
+  }
+
   @PostMapping
   public ResponseEntity postCoffee(@Valid @RequestBody CoffeeDto.Post requestBody) {
 
-    return new ResponseEntity<>(requestBody, HttpStatus.CREATED);
+    Coffee coffee = new Coffee();
+    coffee.setEngName(requestBody.getEngName());
+    coffee.setKorName(requestBody.getKorName());
+    coffee.setPrice(requestBody.getPrice());
+    coffee.setCoffeeCode(requestBody.getCoffeeCode());
+
+    Coffee response = coffeeService.createCoffee(coffee);
+
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{coffee-id}")

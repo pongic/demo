@@ -1,9 +1,10 @@
 package soloproject.demo.coffee.service;
 
+import org.springframework.stereotype.Service;
 import soloproject.demo.coffee.entity.Coffee;
 
 import java.util.List;
-
+@Service
 public class CoffeeService {
   public Coffee createCoffee(Coffee coffee) {
     Coffee createdCoffee = coffee;

@@ -1,9 +1,11 @@
 package soloproject.demo.member.service;
 
+import org.springframework.stereotype.Service;
 import soloproject.demo.member.entity.Member;
 
 import java.util.List;
 
+@Service
 public class MemberService {
   public Member createMember(Member member) {
     Member createdMember = member;

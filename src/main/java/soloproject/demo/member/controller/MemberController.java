@@ -5,11 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import soloproject.demo.member.dto.MemberDto;
+import soloproject.demo.member.entity.Member;
 import soloproject.demo.member.service.MemberService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,34 +27,50 @@ public class MemberController {
   @PostMapping
   public ResponseEntity postMember(@Valid @RequestBody MemberDto.Post requestBody) {
 
-    return new ResponseEntity<>(requestBody, HttpStatus.CREATED);
+    Member member = new Member();
+    member.setEmail(requestBody.getEmail());
+    member.setName(requestBody.getName());
+    member.setPhone(requestBody.getPhone());
+
+    Member response = memberService.createMember(member);
+
+    return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
 
   @PatchMapping("/{member-id}")
   public ResponseEntity patchMember(@PathVariable("member-id") @Positive long memberId,
                                     @Valid @RequestBody MemberDto.Patch requestBody) {
     requestBody.setMemberId(memberId);
-    requestBody.setName("홍길동");
 
-    return new ResponseEntity<>(requestBody, HttpStatus.OK);
+    Member member = new Member();
+    member.setMemberId(requestBody.getMemberId());
+    member.setName(requestBody.getName());
+    member.setPhone(requestBody.getPhone());
+
+    Member response = memberService.updateMember(member);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @GetMapping("/{member-id}")
   public ResponseEntity getMember(@PathVariable("member-id") @Positive long memberId) {
-    System.out.println("#memberId: " + memberId);
 
-    return new ResponseEntity<>(HttpStatus.OK);
+    Member response = memberService.findMember(memberId);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity getMembers() {
-    System.out.println("# get Members");
+    List<Member> response = memberService.findMembers();
 
-    return new ResponseEntity<>(HttpStatus.OK);
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @DeleteMapping("/{member-id}")
-  public ResponseEntity deleteMember(@PathVariable("order-id") @Positive long orderId) {
+  public ResponseEntity deleteMember(@PathVariable("order-id") @Positive long memberId) {
+    memberService.deleteMember(memberId);
+
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
