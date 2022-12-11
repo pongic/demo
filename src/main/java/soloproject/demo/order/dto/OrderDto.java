@@ -7,7 +7,7 @@ import lombok.Setter;
 public class OrderDto {
   @Getter
   public static class Post {
-    private long memberId;
+    private long orderId;
   }
 
   @Getter
@@ -17,8 +17,8 @@ public class OrderDto {
   }
 
   @Getter
-  @Setter
-  private static class Response {
+  @AllArgsConstructor
+  public static class Response {
     private long orderId;
     private long memberId;
   }

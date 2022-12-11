@@ -6,33 +6,32 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import soloproject.demo.member.dto.MemberDto;
 import soloproject.demo.member.entity.Member;
+import soloproject.demo.member.mapper.MemberMapper;
 import soloproject.demo.member.service.MemberService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("v1/members")
 @Validated
 public class MemberController {
   private final MemberService memberService;
+  private final MemberMapper memberMapper;
 
-  public MemberController(MemberService memberService) {
+  public MemberController(MemberService memberService, MemberMapper memberMapper) {
     this.memberService = memberService;
+    this.memberMapper = memberMapper;
   }
 
   @PostMapping
   public ResponseEntity postMember(@Valid @RequestBody MemberDto.Post requestBody) {
 
-    Member member = new Member();
-    member.setEmail(requestBody.getEmail());
-    member.setName(requestBody.getName());
-    member.setPhone(requestBody.getPhone());
-
-    Member response = memberService.createMember(member);
+    Member request = memberMapper.memberPostDtoToMember(requestBody);
+    Member member = memberService.createMember(request);
+    MemberDto.Response response = memberMapper.memberToMemberResponseDto(member);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -42,12 +41,9 @@ public class MemberController {
                                     @Valid @RequestBody MemberDto.Patch requestBody) {
     requestBody.setMemberId(memberId);
 
-    Member member = new Member();
-    member.setMemberId(requestBody.getMemberId());
-    member.setName(requestBody.getName());
-    member.setPhone(requestBody.getPhone());
-
-    Member response = memberService.updateMember(member);
+    Member request = memberMapper.memberPatchDtoToMember(requestBody);
+    Member member = memberService.updateMember(request);
+    MemberDto.Response response = memberMapper.memberToMemberResponseDto(member);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
@@ -55,14 +51,17 @@ public class MemberController {
   @GetMapping("/{member-id}")
   public ResponseEntity getMember(@PathVariable("member-id") @Positive long memberId) {
 
-    Member response = memberService.findMember(memberId);
+    Member member = memberService.findMember(memberId);
+    MemberDto.Response response = memberMapper.memberToMemberResponseDto(member);
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity getMembers() {
-    List<Member> response = memberService.findMembers();
+
+    List<Member> members = memberService.findMembers();
+    List<MemberDto.Response> response = members.stream().map(member -> memberMapper.memberToMemberResponseDto(member)).collect(Collectors.toList());
 
     return new ResponseEntity<>(response, HttpStatus.OK);
   }

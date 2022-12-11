@@ -6,33 +6,32 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import soloproject.demo.coffee.dto.CoffeeDto;
 import soloproject.demo.coffee.entity.Coffee;
+import soloproject.demo.coffee.mapper.CoffeeMapper;
 import soloproject.demo.coffee.service.CoffeeService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/coffees")
 @Validated
 public class CoffeeController {
   private final CoffeeService coffeeService;
+  private final CoffeeMapper coffeeMapper;
 
-  public CoffeeController(CoffeeService coffeeService) {
+  public CoffeeController(CoffeeService coffeeService, CoffeeMapper coffeeMapper) {
     this.coffeeService = coffeeService;
+    this.coffeeMapper = coffeeMapper;
   }
 
   @PostMapping
   public ResponseEntity postCoffee(@Valid @RequestBody CoffeeDto.Post requestBody) {
 
-    Coffee coffee = new Coffee();
-    coffee.setEngName(requestBody.getEngName());
-    coffee.setKorName(requestBody.getKorName());
-    coffee.setPrice(requestBody.getPrice());
-    coffee.setCoffeeCode(requestBody.getCoffeeCode());
-
-    Coffee response = coffeeService.createCoffee(coffee);
+    Coffee request = coffeeMapper.coffeePostDtoToCoffee(requestBody);
+    Coffee coffee = coffeeService.createCoffee(request);
+    CoffeeDto.Response response = coffeeMapper.coffeeToCoffeeResponseDto(coffee);
 
     return new ResponseEntity<>(response, HttpStatus.CREATED);
   }
@@ -42,27 +41,36 @@ public class CoffeeController {
                                     @Valid @RequestBody CoffeeDto.Patch requestBody) {
 
     requestBody.setCoffeeId(coffeeId);
-    requestBody.setKorName("아메리카노");
 
-    return new ResponseEntity<>(requestBody, HttpStatus.OK);
+    Coffee request = coffeeMapper.coffeePatchDtoToCoffee(requestBody);
+    Coffee coffee = coffeeService.updateCoffee(request);
+    CoffeeDto.Response response = coffeeMapper.coffeeToCoffeeResponseDto(coffee);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @GetMapping("/{coffee-id}")
   public ResponseEntity getCoffee(@PathVariable("coffee-id") @Valid long coffeeId) {
-    System.out.println("#coffeeId: " + coffeeId);
 
-    return new ResponseEntity<>(HttpStatus.OK);
+    Coffee coffee = coffeeService.findCoffee(coffeeId);
+    CoffeeDto.Response response = coffeeMapper.coffeeToCoffeeResponseDto(coffee);
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   @GetMapping
   public ResponseEntity getCoffees() {
-    System.out.println("# get Members");
 
-    return new ResponseEntity<>(HttpStatus.OK);
+    List<Coffee> coffees = coffeeService.findCoffees();
+    List<CoffeeDto.Response> response = coffees.stream().map(coffee -> coffeeMapper.coffeeToCoffeeResponseDto(coffee)).collect(Collectors.toList());
+
+    return new ResponseEntity<>(response,HttpStatus.OK);
   }
 
   @DeleteMapping("/{coffee-id}")
   public ResponseEntity deleteCoffee(@PathVariable("coffee-id") @Valid long coffeeId) {
+    coffeeService.deleteCoffee(coffeeId);
+
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

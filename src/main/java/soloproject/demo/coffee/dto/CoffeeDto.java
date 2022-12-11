@@ -32,15 +32,16 @@ public class CoffeeDto {
     private String korName;
     private String engName;
     private int price;
+    private String coffeeCode;
   }
 
   @AllArgsConstructor
   @Getter
   public static class Response {
     private long coffeeId;
-    private String coffeeCode;
     private String korName;
     private String engName;
     private int price;
+    private String coffeeCode;
   }
 }

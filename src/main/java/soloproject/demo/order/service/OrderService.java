@@ -1,9 +1,10 @@
 package soloproject.demo.order.service;
 
+import org.springframework.stereotype.Service;
 import soloproject.demo.order.entity.Order;
 
 import java.util.List;
-
+@Service
 public class OrderService {
   public Order createOrder(Order order) {
     Order createdOrder = order;
